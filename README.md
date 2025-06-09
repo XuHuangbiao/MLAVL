@@ -15,7 +15,7 @@ The features and label files of Rhythmic Gymnastics and Fis-V dataset can be dow
 
 The features and label files of FS1000 dataset can be download from the [Skating-Mixer](https://github.com/AndyFrancesco29/Audio-Visual-Figure-Skating) repository.
 
-The features and label files of FineFS dataset can be download from the [FineFS](https://github.com/yanliji/FineFS-dataset) repository.
+The features and label files of LOGO dataset can be download from the [UIL-AQA](https://github.com/dx199771/Interpretability-AQA/tree/main) repository.
 
 ## Running
 ### The following are examples only, more details coming soon!
@@ -33,3 +33,18 @@ CUDA_VISIBLE_DEVICES={device ID} python main.py --video-path {path of video feat
 ```
 CUDA_VISIBLE_DEVICES={device ID} python main.py --video-path {path of video features} --train-label-path {path of label file of training set} --test-label-path {path of label file of test set} --action-type {Ball/Clubs/Hoop/Ribbon} --n_decoder 2 --n_query 4 --dropout 0.3 --test --ckpt {the name of the used checkpoint}
 ```
+
+## Citation
+If our project is helpful for your research, please consider citing:
+```
+@InProceedings{Xu_2025_CVPR,
+    author    = {Xu, Huangbiao and Ke, Xiao and Wu, Huanqi and Xu, Rui and Li, Yuezhou and Guo, Wenzhong},
+    title     = {Language-Guided Audio-Visual Learning for Long-Term Sports Assessment},
+    booktitle = {Proceedings of the Computer Vision and Pattern Recognition Conference (CVPR)},
+    month     = {June},
+    year      = {2025},
+    pages     = {23967-23977}
+}
+```
+
+## Acknowledgement
