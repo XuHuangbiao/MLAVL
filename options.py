@@ -24,8 +24,8 @@ parser.add_argument('--weight-decay', type=float, default=1e-4)
 
 parser.add_argument('--optim', type=str, default='adam')
 
-parser.add_argument("--lr-decay", type=str, default=None, help='use what decay scheduler')
-parser.add_argument("--decay-rate", type=float, default=0.1, help="lr decay rate")
+parser.add_argument("--lr-decay", type=str, default='cos', help='use what decay scheduler')
+parser.add_argument("--decay-rate", type=float, default=0.01, help="lr decay rate")
 parser.add_argument("--warmup", type=int, default=0, help="warmup epoch")
 
 parser.add_argument('--in_dim', type=int, default=768)
@@ -57,6 +57,6 @@ parser.add_argument('--CTX_INIT', type=str, default=None)
 parser.add_argument('--PROMPT_DEPTH_VISION', type=int, default=0)
 parser.add_argument('--PROMPT_DEPTH_TEXT', type=int, default=1)
 parser.add_argument('--pretrained_clip_weight', type=str,
-                    default='./models/k400_clip_complete_finetuned_30_epochs.pth')
-parser.add_argument('--action_list', type=str, default='./action-label.csv')
+                    default='./weights/k400_clip_complete_finetuned_30_epochs.pth')
+parser.add_argument('--action_list', type=str, default='./action-label_FS.csv')
 parser.add_argument('--score_range', type=int, default=None)

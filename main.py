@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import options
-from datasets import FS1000Dataset
+from datasets import FS1000Dataset, FisVDataset, RGDataset, LOGODataset
 from torch.utils.data import DataLoader
 from tensorboardX import SummaryWriter
 from models import model, loss
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     if not os.path.exists("./logs/" + args.model_name):
         os.makedirs("./logs/" + args.model_name)
     logger = SummaryWriter(os.path.join('./logs/', args.model_name))
-    best_coef, best_epoch, best_mse, best_epoch2 = -1, -1, 100000., -1
+    best_coef, best_coef_mse, best_epoch, best_mse, best_mse_coef, best_epoch2 = -1, 100000., -1, 100000., -1, -1
     final_train_loss, final_train_coef, final_test_loss, final_test_coef = 0, 0, 0, 0
 
     '''
@@ -143,10 +143,10 @@ if __name__ == '__main__':
             scheduler.step()
         test_loss, test_coef = test_epoch(epc, model, test_loader, logger, device, args)
         if test_coef > best_coef:
-            best_coef, best_epoch = test_coef, epc
+            best_coef, best_coef_mse, best_epoch = test_coef, test_loss, epc
             torch.save(model.state_dict(), './ckpt/' + args.model_name + '_best.pkl')
         if test_loss < best_mse:
-            best_mse, best_epoch2 = test_loss, epc
+            best_mse, best_mse_coef, best_epoch2 = test_loss, test_coef, epc
             torch.save(model.state_dict(), './ckpt/' + args.model_name + '_best_mse.pkl')
         print('Epoch: {}\tLoss: {:.4f}\tTrain Coef: {:.3f}\tTest Loss: {:.4f}\tTest Coef: {:.3f}'
               .format(epc, avg_loss, train_coef, test_loss, test_coef))
@@ -154,7 +154,4 @@ if __name__ == '__main__':
             final_train_loss, final_train_coef, final_test_loss, final_test_coef = \
                 avg_loss, train_coef, test_loss, test_coef
     torch.save(model.state_dict(), './ckpt/' + args.model_name + '.pkl')
-    print('Best Test Coef: {:.3f}\tBest Test Eopch: {}\tBest Test Mse: {:.3f}\tBest Mse Eopch: {}'.format(best_coef,
-                                                                                                          best_epoch,
-                                                                                                          best_mse,
-                                                                                                          best_epoch2))
+    print('Best Test Coef: {:.3f}\tBest Test Coef_Mse: {:.3f}\tBest Test Epoch: {}\tBest Test Mse: {:.3f}\tBest Test Mse_Coef: {:.3f}\tBest Mse Epoch: {}'.format(best_coef, best_coef_mse, best_epoch, best_mse, best_mse_coef, best_epoch2))

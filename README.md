@@ -17,22 +17,34 @@ The features and label files of FS1000 dataset can be download from the [Skating
 
 The features and label files of LOGO dataset can be download from the [UIL-AQA](https://github.com/dx199771/Interpretability-AQA/tree/main) repository.
 
+## Pretrained Model
+If you wish to extract your own action text labels, please download the [ViFi-CLIP](https://github.com/muzairkhattak/ViFi-CLIP) pretrained model and place it in:
+```
+weights/k400_clip_complete_finetuned_30_epochs.pth
+```
+
 ## Running
 ### The following are examples only, more details coming soon!
 
-Please fill in or select the args enclosed by {} first.
+**Note:** Both the FS1000 and Fis-V datasets feature figure skating scenes and share the same action text features: “action-label_FS.csv” and “FS_text_feature.npy”.
+
+Please fill in or select the args enclosed by {} first. For example, on the **FS1000** dataset:
 
 - Training
 
 ```
-CUDA_VISIBLE_DEVICES={device ID} python main.py --video-path {path of video features} --train-label-path {path of label file of training set} --test-label-path {path of label file of test set} --model-name {the name used to save model and log} --action-type {Ball/Clubs/Hoop/Ribbon} --lr 1e-2 --epoch {250/400/500/150} --n_decoder 2 --n_query 4 --alpha 1.0 --margin 1.0 --lr-decay cos --decay-rate 0.01 --dropout 0.3
+CUDA_VISIBLE_DEVICES={device ID} python main.py --video-path {path of video features} --audio-path {path of audio features} --train-label-path {path of label file of training set} --test-label-path {path of label file of test set} --model-name {the name used to save model and log} --action-type {Ball/Clubs/Hoop/Ribbon} --lr 1e-2 --epoch {250/400/500/150} --in_dim 768 --n_head 8 --n_encoder 1 --n_decoder 3 --n_query 6 --alpha 1.0 --margin 1.0 --lr-decay cos --decay-rate 0.01 --dropout 0.3
 ```
 
 - Testing
 
 ```
-CUDA_VISIBLE_DEVICES={device ID} python main.py --video-path {path of video features} --train-label-path {path of label file of training set} --test-label-path {path of label file of test set} --action-type {Ball/Clubs/Hoop/Ribbon} --n_decoder 2 --n_query 4 --dropout 0.3 --test --ckpt {the name of the used checkpoint}
+CUDA_VISIBLE_DEVICES={device ID} python main.py --video-path {path of video features} --audio-path {path of audio features} --train-label-path {path of label file of training set} --test-label-path {path of label file of test set} --action-type {Ball/Clubs/Hoop/Ribbon} --in_dim 768 --n_head 8 --n_encoder 1 --n_decoder 3 --n_query 6 --test --ckpt {the name of the used checkpoint}
 ```
+
+Additionally, you can select a result that balances SRCC and MSE based on the specific requirements of your application.
+
+Be patient and persistent in tuning the code to achieve new state-of-the-art results.
 
 ## Citation
 If our project is helpful for your research, please consider citing:
@@ -48,3 +60,6 @@ If our project is helpful for your research, please consider citing:
 ```
 
 ## Acknowledgement
+This repository builds upon [GDLT (CVPR 2022)](https://github.com/xuangch/CVPR22_GDLT).
+
+We thank the authors for their contributions to the research community.

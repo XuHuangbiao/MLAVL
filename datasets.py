@@ -3,6 +3,7 @@ import numpy as np
 import os
 import torch
 import torch.nn.functional as F
+import pickle
 import pandas as pd
 
 
@@ -74,10 +75,190 @@ class FS1000Dataset(Dataset):
         audio_feat = torch.from_numpy(audio_feat).float()
         video_feat = torch.from_numpy(video_feat).float()
         return video_feat, audio_feat, self.normalize_score(self.labels[idx][1])
-        # return video_feat, audio_feat, self.labels[idx][1]
 
     def __len__(self):
         return len(self.labels)
 
     def normalize_score(self, score):
         return score / self.score_range
+
+
+class FisVDataset(Dataset):
+    def __init__(self, video_feat_path, audio_feat_path, label_path, action_list, clip_num=26, action_type='TES', train=True, args=None):
+        self.train = train
+        self.video_path = os.path.join(video_feat_path, 'FISV_rgb_VST.npy')
+        self.audio_path = os.path.join(audio_feat_path, 'FISV_audio_AST.npy')
+        self.erase_path = video_feat_path + '_erTrue'
+        if action_type == 'TES':
+            self.score_range = 45
+            args.score_range = 45
+        else:
+            self.score_range = 40
+            args.score_range = 40
+        self.clip_num = clip_num
+        self.labels = self.read_label(label_path, action_type)
+        classes_all = pd.read_csv(action_list)
+        self.action_list = classes_all['name'].values.tolist()
+
+    @property
+    def classes(self):
+        return self.action_list
+
+    def read_label(self, label_path, action_type):
+        fr = open(label_path, 'r')
+        idx = {'TES': 1, 'PCS': 2}
+        labels = []
+        for i, line in enumerate(fr):
+            if i == 0:
+                continue
+            line = line.strip().split()
+            labels.append([line[0], float(line[idx[action_type]])])
+        return labels
+
+    def __getitem__(self, idx):
+        video_feat = np.load(self.video_path, allow_pickle=True).item()[self.labels[idx][0]]
+        audio_feat = np.load(self.audio_path, allow_pickle=True).item()[self.labels[idx][0]]
+        #
+        # temporal random crop or padding
+        if self.train:
+            if len(video_feat) > self.clip_num:
+                st = np.random.randint(0, len(video_feat) - self.clip_num)
+                video_feat = video_feat[st:st + self.clip_num]
+                audio_feat = audio_feat[st:st + self.clip_num]
+                # erase_feat = erase_feat[st:st + self.clip_num]
+            elif len(video_feat) < self.clip_num:
+                new_feat = np.zeros((self.clip_num, video_feat.shape[1]))
+                new_feat[:video_feat.shape[0]] = video_feat
+                video_feat = new_feat
+                new_feat = np.zeros((self.clip_num, audio_feat.shape[1]))
+                new_feat[:audio_feat.shape[0]] = audio_feat
+                audio_feat = new_feat
+        else:
+            if len(video_feat) > self.clip_num:
+                st = (len(video_feat) - self.clip_num) // 2
+                video_feat = video_feat[st:st + self.clip_num]
+                audio_feat = audio_feat[st:st + self.clip_num]
+                # erase_feat = erase_feat[st:st + self.clip_num]
+            elif len(video_feat) < self.clip_num:
+                new_feat = np.zeros((self.clip_num, video_feat.shape[1]))
+                new_feat[:video_feat.shape[0]] = video_feat
+                video_feat = new_feat
+                new_feat = np.zeros((self.clip_num, audio_feat.shape[1]))
+                new_feat[:audio_feat.shape[0]] = audio_feat
+                audio_feat = new_feat
+        audio_feat = torch.from_numpy(audio_feat).float()
+        video_feat = torch.from_numpy(video_feat).float()
+        return video_feat, audio_feat, self.normalize_score(self.labels[idx][1])
+
+    def __len__(self):
+        return len(self.labels)
+
+    def normalize_score(self, score):
+        return score / self.score_range
+
+
+class RGDataset(Dataset):
+    def __init__(self, video_feat_path, audio_feat_path, label_path, action_list, clip_num=26, action_type='Ball', train=True, args=None):
+        self.train = train
+        self.video_path = os.path.join(video_feat_path, action_type + '_rgb_VST.npy')
+        self.audio_path = os.path.join(audio_feat_path, action_type + '_audio_AST.npy')
+        self.erase_path = video_feat_path + '_erTrue'
+        self.score_range = 25.
+        self.clip_num = clip_num
+        self.labels = self.read_label(label_path, action_type)
+        classes_all = pd.read_csv(action_list)
+        self.action_list = classes_all['name'].values.tolist()
+
+    @property
+    def classes(self):
+        return self.action_list
+
+    def read_label(self, label_path, action_type):
+        fr = open(label_path, 'r')
+        idx = {'Difficulty_Score': 1, 'Execution_Score': 2, 'Total_Score': 3}
+        labels = []
+        for i, line in enumerate(fr):
+            if i == 0:
+                continue
+            line = line.strip().split()
+            if action_type == 'all' or action_type == line[0].split('_')[0]:
+                labels.append([line[0], float(line[idx['Total_Score']])])
+        return labels
+
+    def __getitem__(self, idx):
+        video_feat = np.load(self.video_path, allow_pickle=True).item()[self.labels[idx][0]]
+        audio_feat = np.load(self.audio_path, allow_pickle=True).item()[self.labels[idx][0]]
+        #
+        # temporal random crop or padding
+        if self.train:
+            if len(video_feat) > self.clip_num:
+                st = np.random.randint(0, len(video_feat) - self.clip_num)
+                video_feat = video_feat[st:st + self.clip_num]
+                audio_feat = audio_feat[st:st + self.clip_num]
+                # erase_feat = erase_feat[st:st + self.clip_num]
+            elif len(video_feat) < self.clip_num:
+                new_feat = np.zeros((self.clip_num, video_feat.shape[1]))
+                new_feat[:video_feat.shape[0]] = video_feat
+                video_feat = new_feat
+                new_feat = np.zeros((self.clip_num, audio_feat.shape[1]))
+                new_feat[:audio_feat.shape[0]] = audio_feat
+                audio_feat = new_feat
+        else:
+            if len(video_feat) > self.clip_num:
+                st = (len(video_feat) - self.clip_num) // 2
+                video_feat = video_feat[st:st + self.clip_num]
+                audio_feat = audio_feat[st:st + self.clip_num]
+                # erase_feat = erase_feat[st:st + self.clip_num]
+            elif len(video_feat) < self.clip_num:
+                new_feat = np.zeros((self.clip_num, video_feat.shape[1]))
+                new_feat[:video_feat.shape[0]] = video_feat
+                video_feat = new_feat
+                new_feat = np.zeros((self.clip_num, audio_feat.shape[1]))
+                new_feat[:audio_feat.shape[0]] = audio_feat
+                audio_feat = new_feat
+        audio_feat = torch.from_numpy(audio_feat).float()
+        video_feat = torch.from_numpy(video_feat).float()
+        return video_feat, audio_feat, self.normalize_score(self.labels[idx][1])
+
+    def __len__(self):
+        return len(self.labels)
+
+    def normalize_score(self, score):
+        return score / self.score_range
+
+
+class LOGODataset(Dataset):
+    def __init__(self, video_feat_path, label_path, action_list, clip_num=26, train=True):
+        self.train = train
+        self.video_path = video_feat_path
+        self.clip_num = clip_num
+        with open('./LOGO/LOGO Anno&Split/anno_dict.pkl', 'rb') as f:
+            self.label_dict = pickle.load(f)
+        self.labels = self.read_label(label_path)
+        classes_all = pd.read_csv(action_list)
+        self.action_list = classes_all['name'].values.tolist()
+
+    @property
+    def classes(self):
+        return self.action_list
+
+    def read_label(self, label_path):
+        with open(label_path, 'rb') as f:
+            pickle_data = pickle.load(f)
+        # idx = {'Difficulty_Score': 1, 'Execution_Score': 2, 'Total_Score': 3}
+        labels = []
+        for item in pickle_data:
+            labels.append([str(item[0])+'_'+str(item[1]), float(self.label_dict.get(item)[1])])
+        return labels
+
+    def __getitem__(self, idx):
+        video_feat = np.load(os.path.join(self.video_path, self.labels[idx][0] + '.npy'), allow_pickle=True)
+
+        video_feat = torch.from_numpy(video_feat).float()
+        return video_feat, self.normalize_score(self.labels[idx][1])
+
+    def __len__(self):
+        return len(self.labels)
+
+    def normalize_score(self, score):
+        return score / 100
