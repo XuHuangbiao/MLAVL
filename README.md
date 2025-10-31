@@ -11,11 +11,11 @@ This is the code for CVPR2025 paper "Language-Guided Audio-Visual Learning for L
 
 ## Features
 
-The features and label files of Rhythmic Gymnastics and Fis-V dataset can be download from the [GDLT](https://github.com/xuangch/CVPR22_GDLT) repository.
+The features (RGB, Audio, Flow) and label files of Rhythmic Gymnastics and Fis-V dataset can be download from the [PAMFN](https://github.com/qinghuannn/PAMFN) repository.
 
-The features and label files of FS1000 dataset can be download from the [Skating-Mixer](https://github.com/AndyFrancesco29/Audio-Visual-Figure-Skating) repository.
+The features (RGB, Audio) and label files of FS1000 dataset can be download from the [Skating-Mixer](https://github.com/AndyFrancesco29/Audio-Visual-Figure-Skating) repository.
 
-The features and label files of LOGO dataset can be download from the [UIL-AQA](https://github.com/dx199771/Interpretability-AQA/tree/main) repository.
+The features (RGB) and label files of LOGO dataset can be download from the [UIL-AQA](https://github.com/dx199771/Interpretability-AQA/tree/main) repository.
 
 ## Pretrained Model
 If you wish to extract your own action text labels, please download the [ViFi-CLIP](https://github.com/muzairkhattak/ViFi-CLIP) pretrained model and place it in:
